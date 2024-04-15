@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Product;
+use App\Models\{Category, Product};
 use Illuminate\Http\Request;
 
 class ProductController extends Controller
@@ -12,6 +12,11 @@ class ProductController extends Controller
      */
     public function index()
     {
+        if (request()->has('searchTerm')) {
+            return view('products.index', [
+                'products' => Product::where('name', 'like', "%".request('searchTerm')."%")->paginate(10)
+            ]);
+        }
         return view('products.index', [
             'products' => Product::paginate(10)
         ]);
@@ -22,7 +27,9 @@ class ProductController extends Controller
      */
     public function create()
     {
-        //
+        return view('products.create',[
+            'categories' => Category::all()
+        ]);
     }
 
     /**
@@ -30,7 +37,29 @@ class ProductController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        //validate name unique,required
+        $request->validate([
+            'name' => 'required|unique:products',
+            'category_id' => 'required',
+            'photo' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:8192',
+            'description' => 'required'
+        ]);
+
+        //store photo
+        $photo = $request->file('photo');
+        $photo->storeAs('public/products', $photo->hashName());
+
+        //store product
+        $product = Product::create([
+            'name' => $request->name,
+            'category_id' => $request->category_id,
+            'photo' => $photo->hashName(),
+            'description' => $request->description
+        ]);
+
+        return redirect()->route('products.index')->with('success', 'Producto creado con éxito!');
+
+
     }
 
     /**
