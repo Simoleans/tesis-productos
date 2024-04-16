@@ -9,7 +9,7 @@ class Product extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'category_id', 'photo', 'description'];
+    protected $fillable = ['name', 'category_id', 'photo', 'description','stock'];
 
     //boot created user_id auth
     protected static function boot()

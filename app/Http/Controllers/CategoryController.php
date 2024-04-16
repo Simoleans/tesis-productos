@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Category;
+use App\Models\{Category, Log};
 use Illuminate\Http\Request;
 
 class CategoryController extends Controller
@@ -12,6 +12,20 @@ class CategoryController extends Controller
      */
     public function index()
     {
+
+        if (request()->has('searchTerm')) {
+            $query = Category::where('name', 'like', "%".request('searchTerm')."%");
+
+            if($query->count() == 0) {
+                return redirect()->route('categories.index')->with('success', 'No se encontraron resultados');
+            }else{
+                return view('categories.index', [
+                    'categories' => $query->paginate(10)
+                ]);
+            }
+
+        }
+
         return view('categories.index', [
             'categories' => Category::paginate(10)
         ]);
@@ -30,7 +44,6 @@ class CategoryController extends Controller
      */
     public function store(Request $request)
     {
-        //dd($request->all(),$request->name);
         //validate name unique,required
         $request->validate([
             'name' => 'required|unique:categories'
@@ -39,6 +52,11 @@ class CategoryController extends Controller
         //store category
         $category = Category::create([
             'name' => $request->name
+        ]);
+
+        Log::create([
+            'message' => 'Se ha creado una nueva categoría',
+            'user_id' => auth()->id()
         ]);
 
         //redirect to categories.index
@@ -59,7 +77,7 @@ class CategoryController extends Controller
      */
     public function edit(Category $category)
     {
-        //
+        return view('categories.edit', compact('category'));
     }
 
     /**
@@ -67,7 +85,24 @@ class CategoryController extends Controller
      */
     public function update(Request $request, Category $category)
     {
-        //
+        //validate name unique,required
+        $request->validate([
+            'name' => 'required|unique:categories,name,' . $category->id
+        ]);
+
+        //update category
+        $category->update([
+            'name' => $request->name
+        ]);
+
+        Log::create([
+            'message' => 'Se ha actualizado una categoría',
+            'user_id' => auth()->id()
+        ]);
+
+        //redirect to categories.index
+        return redirect()->route('categories.index')
+            ->with('success', 'Categoria actualizada correctamente.');
     }
 
     /**
@@ -75,6 +110,17 @@ class CategoryController extends Controller
      */
     public function destroy(Category $category)
     {
-        //
+
+        //delete
+        $category->delete();
+
+        Log::create([
+            'message' => 'Se ha eliminado una categoría',
+            'user_id' => auth()->id()
+        ]);
+
+        //redirect to categories.index
+        return redirect()->route('categories.index')
+            ->with('success', 'Categoria eliminada correctamente.');
     }
 }

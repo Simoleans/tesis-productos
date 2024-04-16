@@ -14,6 +14,39 @@
                 class="text-sm text-gray-600 dark:text-gray-400"
             ></div>
         @endif
+        <div class="py-12">
+            <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+                <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg flex">
+                    {{-- select products --}}
+                    <form action="{{route('stock.report')}}" method="POST" class="flex w-full">
+                        @csrf
+                        <div class="p-5 w-full">
+                            <x-input-label for="product_id" :value="__('Producto')" />
+                            <select name="product_id" id="product_id" class="mt-1 block w-full rounded-md dark:border-gray-700" required>
+                                <option value="">Seleccione una categoria</option>
+                                @foreach ($products as $c)
+                                    <option value="{{ $c->id }}">{{ $c->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="p-5 w-full">
+                            <x-input-label for="type" :value="__('Tipo')" />
+                            <select name="type" id="type" class="mt-1 block w-full rounded-md dark:border-gray-700" >
+                                <option value="3">Todos</option>
+                                <option value="1">Entrada</option>
+                                <option value="2">Salida</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg flex justify-end">
+                        {{-- select products --}}
+                        <div class="p-5">
+                            <button type="submit" class="px-4 py-1 flex items-center text-white bg-blue-500 rounded-md dark:bg-blue-600">{{ __('Generar PDF') }}</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
 
     <div class="py-12">
         <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
@@ -46,7 +79,10 @@
                                     {{ __('Foto') }}
                                 </th>
                                 <th scope="col" class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase dark:text-gray-300">
-                                    {{ __('Creacion') }}
+                                    {{ __('Stock') }}
+                                </th>
+                                <th scope="col" class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase dark:text-gray-300">
+                                    {{ __('Accion') }}
                                 </th>
                             </tr>
                         </thead>
@@ -64,12 +100,32 @@
                                         <img src="{{ asset('storage/products/' . $product->photo) }}" alt="{{ $product->photo }}" class="w-10 h-10 rounded-full">
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
-                                        {{ $product->created_at->format('M d, Y') }}
+                                        {{ $product->stock }}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium flex gap-2">
+
+
+
+                                        <a href="{{ route('stock', $product->id) }}" class="text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-600">{{ __('Entrada/Salida') }}</a>
+
+                                        @if (auth()->user()->rol == 1)
+                                        <a href="{{ route('products.edit', $product->id) }}" class="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-600">{{ __('Editar') }}</a>
+
+                                            <form method="POST" action="{{ route('products.destroy', $product->id) }}">
+                                                @csrf
+                                                @method('DELETE')
+
+                                                <button onclick="return confirm('¿Estás seguro de que quieres eliminar este producto?')" type="submit"  class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-600">{{ __('Eliminar') }}</button>
+
+                                            </form>
+                                        @endif
+
                                     </td>
                                 </tr>
                             @endforeach
                         </tbody>
                     </table>
+
 
                     <div class="mt-4">
                         {{ $products->links() }}
@@ -78,4 +134,21 @@
             </div>
         </div>
     </div>
+
+
 </x-app-layout>
+
+@if (isset($product))
+
+    <script>
+        function confirmDelete() {
+        if (confirm('¿Estás seguro de que quieres eliminar este producto?')) {
+
+            const form = document.querySelector(`form[action="{{ route('products.destroy', $product?->id) }}"]`);
+
+            form.submit();
+        }
+        }
+    </script>
+@endif
+

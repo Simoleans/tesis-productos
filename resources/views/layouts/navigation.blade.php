@@ -6,10 +6,9 @@
                 <!-- Logo -->
                 <div class="flex items-center shrink-0">
                     <a href="{{ route('dashboard') }}">
-                        <x-application-logo class="block w-auto text-gray-800 fill-current h-9 dark:text-gray-200" />
+                        <img src="{{asset('img/logo.png')}}" width="40">
                     </a>
                 </div>
-
                 <!-- Navigation Links -->
                 <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
                     <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
@@ -44,11 +43,18 @@
                         <x-dropdown-link :href="route('profile.edit')">
                             {{ __('Perfil') }}
                         </x-dropdown-link>
+                        @if (auth()->user()->rol == 1)
+                            <x-dropdown-link :href="route('users.index')">
+                                {{ __('Usuarios') }}
+                            </x-dropdown-link>
+                            <x-dropdown-link :href="route('logs')">
+                                {{ __('Bitacora') }}
+                            </x-dropdown-link>
+                        @endif
 
                         <!-- Authentication -->
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
-
                             <x-dropdown-link :href="route('logout')"
                                     onclick="event.preventDefault();
                                                 this.closest('form').submit();">
@@ -90,6 +96,15 @@
                 <x-responsive-nav-link :href="route('profile.edit')">
                     {{ __('Perfil') }}
                 </x-responsive-nav-link>
+                @if (auth()->user()->rol == 1)
+                    <x-responsive-nav-link :href="route('users.index')">
+                        {{ __('Usuarios') }}
+                    </x-responsive-nav-link>
+                    <x-responsive-nav-link :href="route('logs')">
+                        {{ __('Bitacora') }}
+                    </x-responsive-nav-link>
+                @endif
+
 
                 <!-- Authentication -->
                 <form method="POST" action="{{ route('logout') }}">

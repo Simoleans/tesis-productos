@@ -1,7 +1,7 @@
 <x-app-layout>
     <x-slot name="header">
         <h2 class="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-200">
-            {{ __('Crear Productos') }}
+            {{ __('Editar Productos') }}
         </h2>
     </x-slot>
 
@@ -9,35 +9,29 @@
         <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
             <div class="overflow-hidden bg-white shadow-sm dark:bg-gray-800 sm:rounded-lg">
                 <div class="p-6 text-gray-900 dark:text-gray-100">
-                    <form method="post" action="{{ route('products.store') }}" class="mt-6 space-y-6" enctype="multipart/form-data">
+                    <form method="post" action="{{ route('products.update', $product->id) }}" class="mt-6 space-y-6" enctype="multipart/form-data">
                         @csrf
+                        @method('PUT')
                         {{-- category_id --}}
                         <div>
                             <x-input-label for="category_id" :value="__('Categoria')" />
                             <select name="category_id" id="category_id" class="mt-1 block w-full rounded-md dark:border-gray-700" required>
                                 <option value="">Seleccione una categoria</option>
                                 @foreach ($categories as $c)
-                                    <option value="{{ $c->id }}">{{ $c->name }}</option>
+                                    <option value="{{ $c->id }}" {{ $c->id === $product->category_id ? 'selected' : '' }}>{{ $c->name }}</option>
                                 @endforeach
                             </select>
                             <x-input-error class="mt-2" :messages="$errors->get('category_id')" />
                         </div>
                         <div>
                             <x-input-label for="name" :value="__('Nombre')" />
-                            <x-text-input id="name" name="name" type="text" class="mt-1 block w-full" :value="old('name')" required autofocus autocomplete="name" />
+                            <x-text-input id="name" name="name" value="{{$product->name}}" type="text" class="mt-1 block w-full" required autofocus autocomplete="name" />
                             <x-input-error class="mt-2" :messages="$errors->get('name')" />
                         </div>
                         <div>
                             <x-input-label for="description" :value="__('Descripcion')" />
-                            <textarea id="description" name="description" class="mt-1 block w-full rounded-md dark:border-gray-700" required></textarea>
+                            <textarea id="description" name="description" class="mt-1 block w-full rounded-md dark:border-gray-700" required>{{$product->description}}</textarea>
                             <x-input-error class="mt-2" :messages="$errors->get('description')" />
-                        </div>
-
-                        <div>
-                            <x-input-label for="stock" :value="__('Stock')" />
-                            <x-text-input id="stock" name="stock" type="number" class="mt-1 block
-                                w-full" :value="old('stock')" required autofocus autocomplete="stock" />
-                            <x-input-error class="mt-2" :messages="$errors->get('stock')" />
                         </div>
 
                         <div class="mt-5 flex">
@@ -53,7 +47,7 @@
                         </div>
 
                         <div class="flex items-center justify-end gap-4">
-                            <x-primary-button>{{ __('Guardar') }}</x-primary-button>
+                            <x-primary-button>{{ __('Editar') }}</x-primary-button>
 
                             @if (session('status') === 'product-updated')
                                 <p
